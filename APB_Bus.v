@@ -14,12 +14,12 @@ reg [1:0] state , next_state ;
 // SETUP : PSEL != 2`b00 , PENABLE = 0 ,  Transfer = 1 
 // Access : PSEL != 2`b00 , PENABLE = 1 ,  Transfer = 1 
 
-localparam IDLE = 3'b00, SETUP = 3'b01, ACCESS = 3'b10 ; 
+localparam IDLE = 2'b00, SETUP = 2'b01, ACCESS = 2'b10 ; 
 //assign PSEL = ( (state!= IDLE ) ? (PADDR_I[31] ? 2'b10 : 2'b01) : 2'b00 );)
 
 always@(PCLK)
 begin
-  if(PADDR_I == 31'h1000 || PADDR_I == 31'h1004)
+  if(PADDR_I == 32'h1000 || PADDR_I == 32'h1004 || PADDR_I == 32'h1008)
     PSEL = 2'b10 ;
   else if (PADDR_I == 2000 || PADDR_I == 2004 || PADDR_I == 2008 )
     PSEL = 2'b01;
@@ -120,7 +120,8 @@ begin
 #10
 PCLK = ~PCLK;
 end
-/* write
+
+/*
 initial
 begin
   
@@ -140,12 +141,14 @@ PADDR_I = 31'h1000 ; write_data = 31'hF0FF00F0;
 
 @(negedge PCLK)
 PRESTn = 1 ; transfer = 0 ; Read_Write=1 ; PREADY = 0 ;
+@(negedge PCLK)
+@(negedge PCLK)
+$stop;
 
 end
-
 */
 
-/* read 
+
 initial
 begin
   
@@ -165,28 +168,12 @@ PADDR_I = 31'h1000 ; PRDATA = 32'h0EC25F01;
 
 @(negedge PCLK)
 PADDR_I = 31'h00 ; transfer = 0 ;
-end
-initial
-begin
-  
-PCLK = 0 ; PRESTn = 0 ; transfer = 0 ;
+@(negedge PCLK)
+@(negedge PCLK)
+$stop;
 
-@(negedge PCLK)
-PRESTn = 1 ; transfer = 1 ; Read_Write=0 ; PREADY = 0 ;
-PADDR_I = 31'h1000 ;
-
-@(negedge PCLK)
-@(negedge PCLK)
-PRESTn = 1 ; transfer = 1 ; Read_Write=0 ; PREADY = 1 ;
-PADDR_I = 31'h1000 ; PRDATA = 32'h0EC25F01;
-
-@(negedge PCLK)
-PRESTn = 1 ; transfer = 1 ; Read_Write=0 ; PREADY = 1 ;
-PADDR_I = 31'h1000 ; PRDATA = 32'h0EC25F01;
-
-@(negedge PCLK)
-PADDR_I = 31'h00 ; transfer = 0 ;
 end
 
-*/
+
+
 endmodule
